@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { renderToolInterface } from "./toolDisplay.js";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -85,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Tool "${toolName}" data not found in API response.`);
             }
             const toolObject = apiResponse.tools[toolName];
+            console.debug("Received tool object: ", toolObject)
 
             const toolInterfaceData = {
                 id: toolName,
@@ -114,13 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         type: inputType,    
                         valueType: valueType, 
                         label: label,
+                        authServices: param.authSources,
                         required: param.required || false,
                         // defaultValue: param.default, can't do this yet bc tool manifest doesn't have default
                     };
                 })
             };
 
-            console.log("Transformed toolInterfaceData:", toolInterfaceData);
+            console.debug("Transformed toolInterfaceData:", toolInterfaceData);
 
             renderToolInterface(toolInterfaceData, toolDisplayArea);
         } catch (error) {
