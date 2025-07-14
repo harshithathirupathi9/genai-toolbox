@@ -1,3 +1,11 @@
+.content {
+    padding: 20px;
+    flex-grow: 1;
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+}
+
 body {
     display: flex;
     height: 100vh;
@@ -159,12 +167,19 @@ body {
     gap: 20px;
     margin: 0 0 20px 0;
     align-items: start;
+    flex-shrink: 0;
 }
 
 .tool-info {
     display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+.tool-execution-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
 }
 
 .tool-params {
@@ -220,15 +235,73 @@ body {
     cursor: not-allowed;
 }
 
+.run-button-container {
+    display: flex;
+    justify-content: flex-end; 
+}
+
+.run-tool-btn {
+    background-color: #4285f4ff;
+    color: white;
+    border: none;
+    border-radius: 30px; 
+    padding: 10px 20px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1em;
+    font-weight: bolder;
+    transition: background-color 0.3s ease;
+}
+
+.run-tool-btn:hover {
+    background-color: #357ae8; 
+}
+
 .tool-response {
-    margin: 20px 0 0 0; 
+    margin: 20px 0 0 0;
+    display: flex; 
+    flex-direction: column; 
+    flex-grow: 1; 
+    min-height: 0; 
 }
 
 .tool-response textarea {
     width: 100%;
-    min-height: 150px;
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-family: monospace;
+    flex-grow: 1; 
+    min-height: 0; 
+    resize: vertical;
 }
+
+.response-header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.response-header-controls h5 {
+  margin: 0;
+}
+
+.prettify-container {
+  display: flex;
+  align-items: center; 
+}
+
+.prettify-label {
+  margin-right: 5px; 
+  color: rgb(125, 125, 125);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.prettify-checkbox {
+  cursor: pointer;
+  vertical-align: middle;
+}
+
