@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // helper function to create form inputs for parameters
 function createParamInput(param, toolId) {
     const paramItem = document.createElement('div');
@@ -9,11 +23,21 @@ function createParamInput(param, toolId) {
 
     const nameText = document.createTextNode(param.name);
     label.appendChild(nameText);
+
+    const isAuthParam = param.authServices && param.authServices.length > 0;
+    let additionalLabelText = '';
+    if (isAuthParam) {
+        additionalLabelText += ' (auth)';
+    }
     if (!param.required) {
-        const optionalSpan = document.createElement('span');
-        optionalSpan.textContent = ' (optional)';
-        optionalSpan.classList.add('optional-label'); 
-        label.appendChild(optionalSpan);
+        additionalLabelText += ' (optional)';
+    }
+
+    if (additionalLabelText) {
+        const additionalSpan = document.createElement('span');
+        additionalSpan.textContent = additionalLabelText;
+        additionalSpan.classList.add('param-label-extras'); 
+        label.appendChild(additionalSpan);
     }
     paramItem.appendChild(label);
 
@@ -33,7 +57,13 @@ function createParamInput(param, toolId) {
     
     inputElement.id = inputId;
     inputElement.name = param.name;
-    if (param.type !== 'checkbox') {
+    if (isAuthParam) {
+        inputElement.disabled = true;
+        inputElement.classList.add('auth-param-input'); 
+        if (param.type !== 'checkbox') {
+            inputElement.placeholder = param.authServices;
+        }
+    } else if (param.type !== 'checkbox') {
         inputElement.placeholder = placeholderText.trim();
     }
     paramItem.appendChild(inputElement);
@@ -64,7 +94,7 @@ export function renderToolInterface(tool, containerElement) {
     gridContainer.appendChild(toolInfoContainer);
 
     const paramsContainer = document.createElement('div');
-    paramsContainer.className = 'tool-params';
+    paramsContainer.className = 'tool-params tool-box';
     paramsContainer.innerHTML = '<h5>Parameters:</h5>';
     const form = document.createElement('form');
     form.id = `tool-params-form-${toolId}`;

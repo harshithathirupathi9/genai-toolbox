@@ -12,7 +12,7 @@ body {
 }
 
 .left-nav {
-    flex: 0 0 200px;
+    flex: 0 0 250px;
     background-color: #fff;
     box-shadow: 4px 0px 12px rgba(0, 0, 0, 0.15);
     z-index: 10;
@@ -20,6 +20,8 @@ body {
     flex-direction: column;
     padding: 15px;
     align-items: center;
+    position: relative;
+    z-index: 3;
 }
 
 .second-nav {
@@ -31,10 +33,12 @@ body {
     flex-direction: column;
     padding: 15px;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .nav-logo {
-    width: 100%;
+    width: 90%;
     margin-bottom: 20px;
 }
 
@@ -178,6 +182,7 @@ body {
 }
 
 .tool-box h5 {
+    color: #4285f4ff;
     margin-top: 0;
     font-weight: bold;
 }
@@ -192,7 +197,7 @@ body {
     font-family: inherit;
 }
 
-.optional-label {
+.param-label-extras {
   font-style: italic;
   font-weight: lighter; 
   color: rgb(125, 125, 125);
@@ -208,6 +213,11 @@ body {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-family: inherit;
+}
+
+.auth-param-input {
+    background-color: #e0e0e0; 
+    cursor: not-allowed;
 }
 
 .tool-response {
