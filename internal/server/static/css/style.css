@@ -238,6 +238,7 @@ body {
 .run-button-container {
     display: flex;
     justify-content: flex-end; 
+    gap: 20px;
 }
 
 .run-tool-btn {
@@ -245,7 +246,7 @@ body {
     color: white;
     border: none;
     border-radius: 30px; 
-    padding: 10px 20px;
+    padding: 10px 30px;
     cursor: pointer;
     font: inherit;
     font-size: 1em;
@@ -255,6 +256,19 @@ body {
 
 .run-tool-btn:hover {
     background-color: #357ae8; 
+}
+
+.edit-headers-btn {
+    background-color: rgb(97, 97, 97);
+    color: white;
+    border: none;
+    border-radius: 30px; 
+    padding: 10px 30px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1em;
+    font-weight: bolder;
+    transition: background-color 0.3s ease;
 }
 
 .tool-response {

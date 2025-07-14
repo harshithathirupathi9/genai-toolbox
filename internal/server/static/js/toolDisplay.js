@@ -112,7 +112,7 @@ export function renderToolInterface(tool, containerElement) {
         form.appendChild(createParamInput(param, toolId));
     });
     paramsContainer.appendChild(form);
-    gridContainer.appendChild(paramsContainer); // Params container directly in grid
+    gridContainer.appendChild(paramsContainer); 
 
     containerElement.appendChild(gridContainer);
 
@@ -120,11 +120,16 @@ export function renderToolInterface(tool, containerElement) {
     const runButtonContainer = document.createElement('div');
     runButtonContainer.className = 'run-button-container';
 
+    const editHeadersButton = document.createElement('button');
+    editHeadersButton.className = 'edit-headers-btn';
+    editHeadersButton.textContent = 'Edit Headers';
+    runButtonContainer.appendChild(editHeadersButton);
+
     const runButton = document.createElement('button');
     runButton.className = 'run-tool-btn';
     runButton.textContent = 'Run Tool';
     runButtonContainer.appendChild(runButton);
-    containerElement.appendChild(runButtonContainer); // AFTER grid, BEFORE response
+    containerElement.appendChild(runButtonContainer); 
 
     // response Area (bottom)
     const responseContainer = document.createElement('div');
