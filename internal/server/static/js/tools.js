@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    let toolDetailsAbortController = null;
+
     // fetches tools 
     async function loadTools() {
         secondaryPanelContent.innerHTML = '<p>Fetching tools...</p>';
@@ -86,10 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // fetches details for specific tool
     async function fetchToolDetails(toolName) {
+
+        if (toolDetailsAbortController) {
+            toolDetailsAbortController.abort();
+            console.debug("Aborted previous tool fetch.");
+        }
+
+        toolDetailsAbortController = new AbortController();
+        const signal = toolDetailsAbortController.signal;
+
         toolDisplayArea.innerHTML = '<p>Loading tool details...</p>';
 
         try {
-            const response = await fetch(`/api/tool/${encodeURIComponent(toolName)}`);
+            const response = await fetch(`/api/tool/${encodeURIComponent(toolName)}`, { signal });
             if (!response.ok) {
                  throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -140,8 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderToolInterface(toolInterfaceData, toolDisplayArea);
         } catch (error) {
-            console.error(`Failed to load details for tool "${toolName}":`, error);
-            toolDisplayArea.innerHTML = `<p class="error">Failed to load details for ${toolName}. ${error.message}</p>`;
+            if (error.name === 'AbortError') {
+                console.debug("Previous fetch was aborted, expected behavior.");
+            } else {
+                console.error(`Failed to load details for tool "${toolName}":`, error);
+                toolDisplayArea.innerHTML = `<p class="error">Failed to load details for ${toolName}. ${error.message}</p>`;
+            }
         }
     }
 
