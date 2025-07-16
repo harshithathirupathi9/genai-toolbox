@@ -116,54 +116,51 @@ export function renderToolInterface(tool, containerElement) {
         form.appendChild(createParamInput(param, TOOL_ID));
     });
     paramsContainer.appendChild(form);
-    gridContainer.appendChild(paramsContainer); // Params container directly in grid
+    gridContainer.appendChild(paramsContainer); 
 
     containerElement.appendChild(gridContainer);
 
     const RESPONSE_AREA_ID = `tool-response-area-${TOOL_ID}`;
-    // Container for the run button
     const runButtonContainer = document.createElement('div');
-    runButtonContainer.className = 'run-button-container';
-
     const runButton = document.createElement('button');
+    
     runButton.className = 'run-tool-btn';
     runButton.textContent = 'Run Tool';
+    runButtonContainer.className = 'run-button-container';
     runButtonContainer.appendChild(runButton);
-    containerElement.appendChild(runButtonContainer); // AFTER grid, BEFORE response
+    containerElement.appendChild(runButtonContainer); 
 
     // response Area (bottom)
     const responseContainer = document.createElement('div');
-    responseContainer.className = 'tool-response tool-box';
-
     const responseHeaderControls = document.createElement('div');
-    responseHeaderControls.className = 'response-header-controls';
-
     const responseHeader = document.createElement('h5');
     const responseArea = document.createElement('textarea');
 
+    responseContainer.className = 'tool-response tool-box';
+    responseHeaderControls.className = 'response-header-controls';
     responseHeader.textContent = 'Response:';
     responseHeaderControls.appendChild(responseHeader);
 
     // prettify box
-    const prettifyId = `prettify-${toolId}`;
+    const PRETTIFY_ID = `prettify-${toolId}`;
     const prettifyDiv = document.createElement('div');
-    prettifyDiv.className = 'prettify-container';
-
     const prettifyLabel = document.createElement('label');
-    prettifyLabel.setAttribute('for', prettifyId);
+    const prettifyCheckbox = document.createElement('input');
+
+    prettifyDiv.className = 'prettify-container';
+    prettifyLabel.setAttribute('for', PRETTIFY_ID);
     prettifyLabel.textContent = 'Prettify JSON';
     prettifyLabel.className = 'prettify-label';
 
-    const prettifyCheckbox = document.createElement('input');
     prettifyCheckbox.type = 'checkbox';
-    prettifyCheckbox.id = prettifyId;
+    prettifyCheckbox.id = PRETTIFY_ID;
     prettifyCheckbox.checked = true;
     prettifyCheckbox.className = 'prettify-checkbox';
 
     prettifyDiv.appendChild(prettifyLabel);
     prettifyDiv.appendChild(prettifyCheckbox);
-    responseHeaderControls.appendChild(prettifyDiv);
 
+    responseHeaderControls.appendChild(prettifyDiv);
     responseContainer.appendChild(responseHeaderControls);
 
     responseArea.id = RESPONSE_AREA_ID;
