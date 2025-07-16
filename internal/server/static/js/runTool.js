@@ -1,5 +1,5 @@
 // function to run the tool (calls API version of endpoint)
-export async function handleRunTool(toolId, form, responseArea, parameters, prettifyCheckbox, updateLastResults) {
+export async function handleRunTool(toolId, form, responseArea, parameters, prettifyCheckbox, updateLastResults, headers) {
     responseArea.value = 'Running tool...';
     updateLastResults(null); 
     const formData = new FormData(form);
@@ -74,7 +74,7 @@ export async function handleRunTool(toolId, form, responseArea, parameters, pret
     try {
         const response = await fetch(`/api/tool/${toolId}/invoke`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: JSON.stringify(typedParams)
         });
         if (!response.ok) {
