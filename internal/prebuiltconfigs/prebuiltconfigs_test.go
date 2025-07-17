@@ -28,6 +28,7 @@ func TestLoadPrebuiltToolYAMLs(t *testing.T) {
 		"cloud-sql-mssql",
 		"cloud-sql-mysql",
 		"cloud-sql-postgres",
+		"looker",
 		"postgres",
 		"spanner-postgres",
 		"spanner",
