@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"text/template"
 	"time"
 
@@ -161,7 +162,7 @@ type Tool struct {
 }
 
 // Invoke executes the tool's logic.
-func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) ([]any, error) {
+func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) (any, error) {
 	paramsMap := params.AsMap()
 
 	urlString, err := getURL(t.BaseURL, t.Path, t.PathParams, nil, nil, paramsMap)
@@ -177,9 +178,6 @@ func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) ([]any, err
 	multiplier := 2.0           // Exponential backoff multiplier
 	maxRetries := 10            // Maximum number of retries
 	retries := 0                // Current number of retries
-
-	client := *t.Client
-	client.Timeout = 30 * time.Second
 
 	for retries < maxRetries {
 		select {
@@ -198,7 +196,7 @@ func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) ([]any, err
 			req.Header.Set(k, v)
 		}
 
-		resp, err := client.Do(req)
+		resp, err := t.Client.Do(req)
 		if err != nil {
 			fmt.Printf("error making HTTP request during polling: %s, retrying in %v\n", err, delay)
 			time.Sleep(delay)
@@ -230,7 +228,14 @@ func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) ([]any, err
 					if _, ok := data["error"]; ok {
 						return nil, fmt.Errorf("operation finished with error: %s", string(body))
 					}
-					return []any{string(body)}, nil
+
+					if strings.Contains(t.Name, "alloydb") {
+						if msg, ok := t.generateAlloyDBConnectionMessage(data); ok {
+							return msg, nil
+						}
+					}
+
+					return string(body), nil
 				}
 			}
 		}
@@ -244,6 +249,84 @@ func (t *Tool) Invoke(ctx context.Context, params tools.ParamValues) ([]any, err
 		retries++
 	}
 	return nil, fmt.Errorf("exceeded max retries waiting for operation")
+}
+
+func (t *Tool) generateAlloyDBConnectionMessage(opResponse map[string]any) (string, bool) {
+	responseData, ok := opResponse["response"].(map[string]any)
+	if !ok {
+		return "", false
+	}
+
+	resourceName, ok := responseData["name"].(string)
+	if !ok {
+		return "", false
+	}
+
+	parts := strings.Split(resourceName, "/")
+	var project, region, cluster, instance string
+
+	// Expected format: projects/{project}/locations/{location}/clusters/{cluster}
+	// or projects/{project}/locations/{location}/clusters/{cluster}/instances/{instance}
+	if len(parts) < 6 || parts[0] != "projects" || parts[2] != "locations" || parts[4] != "clusters" {
+		return "", false
+	}
+
+	project = parts[1]
+	region = parts[3]
+	cluster = parts[5]
+
+	if len(parts) >= 8 && parts[6] == "instances" {
+		instance = parts[7]
+	} else {
+		return "", false
+	}
+
+	var b strings.Builder
+	b.WriteString("Your AlloyDB resource is ready.\n\n")
+	b.WriteString("To connect, please configure your environment. The method depends on how you are running the toolbox:\n\n")
+
+	b.WriteString("**If running locally via stdio:**\n")
+	b.WriteString("Update the MCP server configuration with the following environment variables:\n")
+	b.WriteString("```json\n")
+	b.WriteString("{\n")
+	b.WriteString("  \"mcpServers\": {\n")
+	b.WriteString("    \"alloydb\": {\n")
+	b.WriteString("      \"command\": \"./PATH/TO/toolbox\",\n")
+	b.WriteString("      \"args\": [\"--prebuilt\",\"alloydb-postgres\",\"--stdio\"],\n")
+	b.WriteString("      \"env\": {\n")
+	b.WriteString(fmt.Sprintf("          \"ALLOYDB_POSTGRES_PROJECT\": \"%s\",\n", project))
+	b.WriteString(fmt.Sprintf("          \"ALLOYDB_POSTGRES_REGION\": \"%s\",\n", region))
+	b.WriteString(fmt.Sprintf("          \"ALLOYDB_POSTGRES_CLUSTER\": \"%s\",\n", cluster))
+	if instance != "" {
+		b.WriteString(fmt.Sprintf("          \"ALLOYDB_POSTGRES_INSTANCE\": \"%s\",\n", instance))
+	}
+	b.WriteString("          \"ALLOYDB_POSTGRES_DATABASE\": \"postgres\",\n")
+	b.WriteString("          \"ALLOYDB_POSTGRES_USER\": \"<your-user>\",\n")
+	b.WriteString("          \"ALLOYDB_POSTGRES_PASSWORD\": \"<your-password>\"\n")
+	b.WriteString("      }\n")
+	b.WriteString("    }\n")
+	b.WriteString("  }\n")
+	b.WriteString("}\n")
+	b.WriteString("```\n\n")
+
+	b.WriteString("**If running remotely:**\n")
+	b.WriteString("For remote deployments, you will need to set the following environment variables in your deployment configuration. It is recommended to manage these as secrets.\n")
+	b.WriteString("```\n")
+	b.WriteString(fmt.Sprintf("ALLOYDB_POSTGRES_PROJECT=%s\n", project))
+	b.WriteString(fmt.Sprintf("ALLOYDB_POSTGRES_REGION=%s\n", region))
+	b.WriteString(fmt.Sprintf("ALLOYDB_POSTGRES_CLUSTER=%s\n", cluster))
+	if instance != "" {
+		b.WriteString(fmt.Sprintf("ALLOYDB_POSTGRES_INSTANCE=%s\n", instance))
+	}
+	b.WriteString("ALLOYDB_POSTGRES_DATABASE=postgres\n")
+	b.WriteString("ALLOYDB_POSTGRES_USER=<your-user>\n")
+	b.WriteString("ALLOYDB_POSTGRES_PASSWORD=<your-password>\n")
+	b.WriteString("```\n\n")
+	b.WriteString("Please refer to the official documentation for guidance on deploying the toolbox and managing secrets:\n")
+	b.WriteString("- Deploying the Toolbox: https://googleapis.github.io/genai-toolbox/how-to/deploy_toolbox/\n")
+	b.WriteString("- Deploying on GKE: https://googleapis.github.io/genai-toolbox/how-to/deploy_gke/\n")
+
+	return b.String(), true
 }
 
 // ParseParams parses the parameters for the tool.

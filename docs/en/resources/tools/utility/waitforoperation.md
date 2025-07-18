@@ -1,5 +1,5 @@
 ---
-title: "Wait for Operation"
+title: "wait-for-operation"
 type: docs
 weight: 10
 description: >
@@ -8,16 +8,27 @@ description: >
 
 The `wait-for-operation` tool is a utility tool that waits for a long-running operation to complete. It does this by polling an operation status endpoint until the operation is finished using exponential backoff.
 
+{{% notice info %}} 
+This tool is intended for developer assistant workflows with human-in-the-loop and shouldn't be used for production agents.
+{{% /notice %}}
+
 ## Example
 
 ```yaml
+sources:
+  my-http-source:
+    kind: http
+    baseUrl: https://api.example.com
 tools:
   alloydb-operations-get:
     kind: wait-for-operation
-    source: alloydb-api-source
+    source: my-http-source
     method: GET
     path: /v1/projects/{{.projectId}}/locations/{{.locationId}}/operations/{{.operationId}}
-    description: "Makes API call to check whether operation is done or not using exponential backoff. if its still in create phase trigger it after 10 minutes timeout.  Print a message saying still not done. "
+    description: >
+      Makes API call to check whether operation is done or not using exponential backoff. 
+      if its still in create phase trigger it after 10 minutes timeout. 
+      Print a message saying still not done.
     pathParams:
       - name: projectId
         type: string
